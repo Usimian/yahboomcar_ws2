@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 # coding:utf-8
-#import rospy
-import rclpy
-from geometry_msgs.msg import Twist
-from std_msgs.msg import Bool
+# import rospy
+# import rclpy
+# from geometry_msgs.msg import Twist
+# from std_msgs.msg import Bool
+
 
 class SinglePID:
-    def __init__(self, P=0.1, I=0.0, D=0.1):
+    def __init__(self, P=0.1, I=0.0, D=0.1):    # noqa: E741
         self.Kp = P
         self.Ki = I
         self.Kd = D
         print("init_pid: ", P, I, D)
         self.pid_reset()
 
-    def Set_pid(self, P, I, D):
+    def Set_pid(self, P, I, D):    # noqa: E741
         self.Kp = P
         self.Ki = I
         self.Kd = D
