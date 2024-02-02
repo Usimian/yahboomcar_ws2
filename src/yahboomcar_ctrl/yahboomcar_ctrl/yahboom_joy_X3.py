@@ -21,7 +21,7 @@ from std_msgs.msg import Int32, Bool
 class JoyTeleop(Node):
     def __init__(self, name):
         super().__init__(name)
-        self.Joy_active = False
+        self.Joy_active = False     # If True, Joystick movement ON
         self.Buzzer_active = False
         self.RGBLight_index = 0
         self.cancel_time = time.time()
@@ -59,7 +59,13 @@ class JoyTeleop(Node):
     def user_jetson(self, joy_data):
         # Toggle drive on/off
         if joy_data.buttons[9] == 1:
-            self.cancel_nav()
+            if self.prev_button_state[9] == 0:  # Button pressed
+                self.Joy_active = not self.Joy_active   # Toggle movement enable
+                self.cancel_nav()
+                self.prev_button_state[9] = 1
+        else:
+            self.prev_button_state[9] = 0
+
         # RGBLight
         if joy_data.buttons[7] == 1:  # Light bar sequence button pressed (RB)
             RGBLight_ctrl = Int32()
@@ -97,7 +103,7 @@ class JoyTeleop(Node):
                     self.linear_Gear = 3.0 / 4
                 elif self.linear_Gear == 3.0 / 4:
                     self.linear_Gear = 1
-                print(f"Linear speed factor = {self.linear_Gear}")
+                print(f"Linear speed factor = x{self.linear_Gear}")
                 self.prev_button_state[13] = 1
         else:
             self.prev_button_state[13] = 0
@@ -113,7 +119,7 @@ class JoyTeleop(Node):
                     self.angular_Gear = 3.0 / 4
                 elif self.angular_Gear == 3.0 / 4:
                     self.angular_Gear = 1.0
-                print(f"Rotate speed factor = {self.angular_Gear}")
+                print(f"Rotate speed factor = x{self.angular_Gear}")
                 self.prev_button_state[14] = 1
         else:
             self.prev_button_state[14] = 0
@@ -122,14 +128,17 @@ class JoyTeleop(Node):
         # ylinear_speed = self.filter_data(joy_data.axes[2]) * self.yspeed_limit * self.linear_Gear
         ylinear_speed = self.filter_data(joy_data.axes[0]) * self.yspeed_limit * self.linear_Gear
         angular_speed = self.filter_data(joy_data.axes[2]) * self.angular_speed_limit * self.angular_Gear
+
         if xlinear_speed > self.xspeed_limit:
             xlinear_speed = self.xspeed_limit
         elif xlinear_speed < -self.xspeed_limit:
             xlinear_speed = -self.xspeed_limit
+
         if ylinear_speed > self.yspeed_limit:
             ylinear_speed = self.yspeed_limit
         elif ylinear_speed < -self.yspeed_limit:
             ylinear_speed = -self.yspeed_limit
+
         if angular_speed > self.angular_speed_limit:
             angular_speed = self.angular_speed_limit
         elif angular_speed < -self.angular_speed_limit:
@@ -201,19 +210,15 @@ class JoyTeleop(Node):
         return value
 
     def cancel_nav(self):
-        now_time = time.time()
-        if now_time - self.cancel_time > 1:
-            Joy_ctrl = Bool()
-            self.Joy_active = not self.Joy_active
-            Joy_ctrl.data = self.Joy_active
-            if self.Joy_active is True:
-                print("Joystick drive ON")
-            else:
-                print("Joystick Drive OFF")
-            self.pub_JoyState.publish(Joy_ctrl)
-            # self.pub_goal.publish(GoalID())
-            self.pub_cmdVel.publish(Twist())
-            self.cancel_time = now_time
+        Joy_ctrl = Bool()
+        Joy_ctrl.data = self.Joy_active
+        if self.Joy_active is True:
+            print("Joystick drive ON")
+        else:
+            print("Joystick Drive OFF")
+            self.pub_cmdVel.publish(Twist())    # Stop moving
+        self.pub_JoyState.publish(Joy_ctrl)
+        # self.pub_goal.publish(GoalID())
 
 
 def main():

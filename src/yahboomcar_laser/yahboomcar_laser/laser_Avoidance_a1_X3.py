@@ -8,6 +8,7 @@ from std_msgs.msg import Bool
 # commom lib
 import math
 import numpy as np
+
 # import time
 from time import sleep
 from yahboomcar_laser.common import SinglePID
@@ -56,6 +57,7 @@ class laserAvoid(Node):
         if not isinstance(msg, Bool):
             return
         self.Joy_active = msg.data
+        print(msg)
 
     def registerScan(self, scan_data):
         if not isinstance(scan_data, LaserScan):
@@ -76,71 +78,56 @@ class laserAvoid(Node):
             if abs(angle) > 160:
                 if ranges[i] <= self.ResponseDist * 1.5:
                     self.front_warning += 1
-        if self.Joy_active or self.Switch is True:
-            if self.Moving is True:
-                self.pub_vel.publish(Twist())
-                self.Moving = not self.Moving
-            return
-        self.Moving = True
+        # if self.Joy_active or self.Switch is True:
+        #     if self.Moving is True:
+        #         self.pub_vel.publish(Twist())
+        #         self.Moving = not self.Moving
+        #     return
+        # self.Moving = True
         twist = Twist()
         if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
             print("1, there are obstacles in the left and right, turn right")
             twist.linear.x = self.linear
             twist.angular.z = -self.angular
-            self.pub_vel.publish(twist)
-            sleep(0.2)
-
+            sleepTime = 0.2
         elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
             print("2, there is an obstacle in the middle right, turn left")
             twist.linear.x = 0.0
             twist.angular.z = self.angular
-            self.pub_vel.publish(twist)
-            sleep(0.2)
-            if self.Left_warning > 10 and self.Right_warning <= 10:
-                twist.linear.x = 0.0
-                twist.angular.z = -self.angular
-                self.pub_vel.publish(twist)
-                sleep(0.5)
+            sleepTime = 0.2
         elif self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning <= 10:
-            print("4. There is an obstacle in the middle left, turn right")
+            print("3. There is an obstacle in the middle left, turn right")
             twist.linear.x = 0.0
             twist.angular.z = -self.angular
-            self.pub_vel.publish(twist)
-            sleep(0.2)
-            if self.Left_warning <= 10 and self.Right_warning > 10:
-                twist.linear.x = 0.0
-                twist.angular.z = self.angular
-                self.pub_vel.publish(twist)
-                sleep(0.5)
+            sleepTime = 0.2
         elif self.front_warning > 10 and self.Left_warning < 10 and self.Right_warning < 10:
-            print("6, there is an obstacle in the middle, turn left")
+            print("4, there is an obstacle in the middle, turn left")
             twist.linear.x = 0.0
             twist.angular.z = self.angular
-            self.pub_vel.publish(twist)
-            sleep(0.2)
+            sleepTime = 0.2
         elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning > 10:
-            print("7. There are obstacles on the left and right, turn right")
-            twist.linear.x = 0.0
-            twist.angular.z = -self.angular
-            self.pub_vel.publish(twist)
-            sleep(0.4)
-        elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
-            print("8, there is an obstacle on the left, turn right")
-            twist.linear.x = 0.0
-            twist.angular.z = -self.angular
-            self.pub_vel.publish(twist)
-            sleep(0.2)
-        elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
-            print("9, there is an obstacle on the right, turn left")
-            twist.linear.x = 0.0
-            twist.angular.z = self.angular
-            self.pub_vel.publish(twist)
-            sleep(0.2)
-        elif self.front_warning <= 10 and self.Left_warning <= 10 and self.Right_warning <= 10:
-            print("10, no obstacles, go forward")
+            print("5. There are obstacles on the left and right, go straight")
             twist.linear.x = self.linear
             twist.angular.z = 0.0
+            sleepTime = 0.2
+        elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
+            print("6, there is an obstacle on the left, bear right")
+            twist.linear.x = self.linear
+            twist.angular.z = -self.angular
+            sleepTime = 0.2
+        elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
+            print("7, there is an obstacle on the right, bear left")
+            twist.linear.x = self.linear
+            twist.angular.z = self.angular
+            sleepTime = 0.2
+        elif self.front_warning <= 10 and self.Left_warning <= 10 and self.Right_warning <= 10:
+            print("8, no obstacles, go forward")
+            twist.linear.x = self.linear
+            twist.angular.z = 0.0
+            sleepTime = 0.2
+        if self.Joy_active:
             self.pub_vel.publish(twist)
+        sleep(sleepTime)
 
 
 def main():
