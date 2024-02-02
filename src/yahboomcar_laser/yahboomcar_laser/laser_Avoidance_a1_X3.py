@@ -41,7 +41,7 @@ class laserAvoid(Node):
         self.Right_warning = 0
         self.Left_warning = 0
         self.front_warning = 0
-        self.Joy_active = False
+        self.Drive_active = False
         self.ros_ctrl = SinglePID()
 
         self.timer = self.create_timer(0.01, self.on_timer)
@@ -56,7 +56,7 @@ class laserAvoid(Node):
     def JoyStateCallback(self, msg):
         if not isinstance(msg, Bool):
             return
-        self.Joy_active = msg.data
+        self.Drive_active = msg.data
         print(msg)
 
     def registerScan(self, scan_data):
@@ -78,54 +78,55 @@ class laserAvoid(Node):
             if abs(angle) > 160:
                 if ranges[i] <= self.ResponseDist * 1.5:
                     self.front_warning += 1
-        # if self.Joy_active or self.Switch is True:
-        #     if self.Moving is True:
-        #         self.pub_vel.publish(Twist())
-        #         self.Moving = not self.Moving
-        #     return
-        # self.Moving = True
+
         twist = Twist()
         if self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning > 10:
-            print("1, there are obstacles in the left and right, turn right")
+            # print("1, there are obstacles in the left and right, turn right")
             twist.linear.x = self.linear
             twist.angular.z = -self.angular
             sleepTime = 0.2
         elif self.front_warning > 10 and self.Left_warning <= 10 and self.Right_warning > 10:
-            print("2, there is an obstacle in the middle right, turn left")
+            # print("2, there is an obstacle in the middle right, turn left")
             twist.linear.x = 0.0
             twist.angular.z = self.angular
             sleepTime = 0.2
         elif self.front_warning > 10 and self.Left_warning > 10 and self.Right_warning <= 10:
-            print("3. There is an obstacle in the middle left, turn right")
+            # print("3. There is an obstacle in the middle left, turn right")
             twist.linear.x = 0.0
             twist.angular.z = -self.angular
             sleepTime = 0.2
         elif self.front_warning > 10 and self.Left_warning < 10 and self.Right_warning < 10:
-            print("4, there is an obstacle in the middle, turn left")
+            # print("4, there is an obstacle in the middle, turn left")
             twist.linear.x = 0.0
             twist.angular.z = self.angular
             sleepTime = 0.2
         elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning > 10:
-            print("5. There are obstacles on the left and right, go straight")
+            # print("5. There are obstacles on the left and right, go straight")
             twist.linear.x = self.linear
             twist.angular.z = 0.0
             sleepTime = 0.2
         elif self.front_warning < 10 and self.Left_warning > 10 and self.Right_warning <= 10:
-            print("6, there is an obstacle on the left, bear right")
+            # print("6, there is an obstacle on the left, bear right")
             twist.linear.x = self.linear
             twist.angular.z = -self.angular
             sleepTime = 0.2
         elif self.front_warning < 10 and self.Left_warning <= 10 and self.Right_warning > 10:
-            print("7, there is an obstacle on the right, bear left")
+            # print("7, there is an obstacle on the right, bear left")
             twist.linear.x = self.linear
             twist.angular.z = self.angular
             sleepTime = 0.2
         elif self.front_warning <= 10 and self.Left_warning <= 10 and self.Right_warning <= 10:
-            print("8, no obstacles, go forward")
+            # print("8, no obstacles, go forward")
             twist.linear.x = self.linear
             twist.angular.z = 0.0
             sleepTime = 0.2
-        if self.Joy_active:
+
+        print(f"{twist.linear.x}, {twist.angular.z}")
+        if self.Drive_active is True:
+            self.pub_vel.publish(twist)
+        else:
+            twist.linear.x = 0.0
+            twist.angular.z = 0.0
             self.pub_vel.publish(twist)
         sleep(sleepTime)
 

@@ -21,7 +21,8 @@ from std_msgs.msg import Int32, Bool
 class JoyTeleop(Node):
     def __init__(self, name):
         super().__init__(name)
-        self.Joy_active = False     # If True, Joystick movement ON
+        self.Joy_active = False     # True enables joystick
+        self.Drive_active = False   # True enables drive globally
         self.Buzzer_active = False
         self.RGBLight_index = 0
         self.cancel_time = time.time()
@@ -57,14 +58,35 @@ class JoyTeleop(Node):
             self.user_pc(joy_data)
 
     def user_jetson(self, joy_data):
-        # Toggle drive on/off
+        # Toggle joystick control on/off
         if joy_data.buttons[9] == 1:
             if self.prev_button_state[9] == 0:  # Button pressed
                 self.Joy_active = not self.Joy_active   # Toggle movement enable
-                self.cancel_nav()
+                if self.Joy_active is True:
+                    print("Joystick ON")
+                else:
+                    print("Joystick OFF")
+                    self.pub_cmdVel.publish(Twist())    # Stop moving
                 self.prev_button_state[9] = 1
         else:
             self.prev_button_state[9] = 0
+
+        # Toggle drive on/off (Y Button)
+        if joy_data.buttons[4] == 1:
+            if self.prev_button_state[4] == 0:  # Button pressed
+                self.Drive_active = not self.Drive_active   # Toggle movement enable
+                Joy_ctrl = Bool()
+                Joy_ctrl.data = self.Drive_active
+                if self.Drive_active is True:
+                    print("Drive ON")
+                else:
+                    print("Drive OFF")
+                    self.pub_cmdVel.publish(Twist())    # Stop moving
+                self.pub_JoyState.publish(Joy_ctrl)
+                # self.pub_goal.publish(GoalID())
+                self.prev_button_state[4] = 1
+        else:
+            self.prev_button_state[4] = 0
 
         # RGBLight
         if joy_data.buttons[7] == 1:  # Light bar sequence button pressed (RB)
@@ -165,7 +187,7 @@ class JoyTeleop(Node):
             self.Buzzer_active = not self.Buzzer_active
             # print "self.Buzzer_active: ", self.Buzzer_active
             self.pub_Buzzer.publish(self.Buzzer_active)
-            # 档位控制 Gear control
+        # Gear control
         if joy_data.buttons[9] == 1:
             if self.linear_Gear == 1.0:
                 self.linear_Gear = 1.0 / 3
@@ -201,8 +223,7 @@ class JoyTeleop(Node):
         twist.linear.x = xlinear_speed
         twist.linear.y = ylinear_speed
         twist.angular.z = angular_speed
-        for i in range(3):
-            self.pub_cmdVel.publish(twist)
+        self.pub_cmdVel.publish(twist)
 
     def filter_data(self, value):
         if abs(value) < 0.2:
