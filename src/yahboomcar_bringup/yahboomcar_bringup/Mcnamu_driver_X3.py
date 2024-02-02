@@ -84,9 +84,9 @@ class yahboomcar_driver(Node):
         vy = msg.linear.y * 1.0
         angular = msg.angular.z * 1.0  # wait for chang
         self.car.set_car_motion(vx, vy, angular)
-        """print("cmd_vx: ",vx)
-		print("cmd_vy: ",vy)
-		print("cmd_angular: ",angular)"""
+        # print("cmd_vx: ",vx)
+        # print("cmd_vy: ",vy)
+        # print("cmd_angular: ",angular)
         # rospy.loginfo("nav_use_rot:{}".format(self.nav_use_rotvel))
         # print(self.nav_use_rotvel)
 
@@ -94,7 +94,7 @@ class yahboomcar_driver(Node):
         # RGBLight control
         if not isinstance(msg, Int32):
             return
-        print ("RGBLight: ", msg.data)
+        print("RGBLight: ", msg.data)
         self.car.set_colorful_effect(msg.data, 6, parm=1)
 
     def Buzzercallback(self, msg):
@@ -147,9 +147,9 @@ class yahboomcar_driver(Node):
         my = my * 1.0
         mz = mz * 1.0
         vx, vy, angular = self.car.get_motion_data()
-        """print("vx: ",vx)
-		print("vy: ",vy)
-		print("angular: ",angular)"""
+        # print("vx: ",vx)
+        # print("vy: ",vy)
+        # print("angular: ",angular)
         # 发布陀螺仪的数据
         # Publish gyroscope data
         imu.header.stamp = time_stamp.to_msg()
@@ -190,5 +190,5 @@ def main():
     rclpy.spin(driver)
 
 
-"""if __name__ == '__main__':
-	main()"""
+# if __name__ == '__main__':
+# 	main()
