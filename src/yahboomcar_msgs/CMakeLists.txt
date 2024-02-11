@@ -24,6 +24,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ImageMsg.msg"
+  "msg/JoyControl.msg"
   "msg/PointArray.msg"
   "msg/Position.msg"
   "msg/Target.msg"

@@ -16,13 +16,13 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 from actionlib_msgs.msg import GoalID
 from std_msgs.msg import Int32, Bool
+from yahboomcar_msgs.msg import JoyControl
 
 
 class JoyTeleop(Node):
     def __init__(self, name):
         super().__init__(name)
         self.Joy_active = False     # True enables joystick
-        self.Drive_active = False   # True enables drive globally
         self.Buzzer_active = False
         self.RGBLight_index = 0
         self.cancel_time = time.time()
@@ -30,12 +30,17 @@ class JoyTeleop(Node):
         self.linear_Gear = 1
         self.angular_Gear = 1
         self.prev_button_state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.Joy_control = JoyControl()
+        self.Joy_control.btna = False
+        self.Joy_control.btnb = False
+        self.Joy_control.btnx = False
+        self.Joy_control.driveactive = False   # True enables drive globally
 
         # create pub
         self.pub_goal = self.create_publisher(GoalID, "move_base/cancel", 10)
         self.pub_cmdVel = self.create_publisher(Twist, "cmd_vel", 10)
         self.pub_Buzzer = self.create_publisher(Bool, "Buzzer", 1)
-        self.pub_JoyState = self.create_publisher(Bool, "JoyState", 10)
+        self.pub_JoyControl = self.create_publisher(JoyControl, "JoyControl", 10)
         self.pub_RGBLight = self.create_publisher(Int32, "RGBLight", 10)
 
         # create sub
@@ -74,15 +79,13 @@ class JoyTeleop(Node):
         # Toggle drive on/off (Y Button)
         if joy_data.buttons[4] == 1:
             if self.prev_button_state[4] == 0:  # Button pressed
-                self.Drive_active = not self.Drive_active   # Toggle movement enable
-                Joy_ctrl = Bool()
-                Joy_ctrl.data = self.Drive_active
-                if self.Drive_active is True:
+                self.Joy_control.driveactive = not self.Joy_control.driveactive   # Toggle movement enable
+                if self.Joy_control.driveactive is True:
                     print("Drive ON")
                 else:
                     print("Drive OFF")
                     self.pub_cmdVel.publish(Twist())    # Stop moving
-                self.pub_JoyState.publish(Joy_ctrl)
+                self.pub_JoyControl.publish(self.Joy_control)
                 # self.pub_goal.publish(GoalID())
                 self.prev_button_state[4] = 1
         else:

@@ -3,7 +3,8 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
-from std_msgs.msg import Bool
+# from std_msgs.msg import Bool
+from yahboomcar_msgs.msg import JoyControl
 
 # commom lib
 import math
@@ -22,7 +23,7 @@ class laserAvoid(Node):
         super().__init__(name)
         # create a sub
         self.sub_laser = self.create_subscription(LaserScan, "/scan", self.registerScan, 1)
-        self.sub_JoyState = self.create_subscription(Bool, "/JoyState", self.JoyStateCallback, 1)
+        self.sub_JoyControl = self.create_subscription(JoyControl, "/JoyControl", self.JoyControlCallback, 1)
         # create a pub
         self.pub_vel = self.create_publisher(Twist, "/cmd_vel", 1)
 
@@ -43,6 +44,7 @@ class laserAvoid(Node):
         self.front_warning = 0
         self.Drive_active = False
         self.ros_ctrl = SinglePID()
+        self.joy_control = JoyControl()
 
         self.timer = self.create_timer(0.01, self.on_timer)
 
@@ -53,10 +55,10 @@ class laserAvoid(Node):
         self.LaserAngle = self.get_parameter("LaserAngle").get_parameter_value().double_value
         self.ResponseDist = self.get_parameter("ResponseDist").get_parameter_value().double_value
 
-    def JoyStateCallback(self, msg):
-        if not isinstance(msg, Bool):
+    def JoyControlCallback(self, msg):
+        if not isinstance(msg, JoyControl):
             return
-        self.Drive_active = msg.data
+        self.joy_control = msg
         print(msg)
 
     def registerScan(self, scan_data):
@@ -120,9 +122,11 @@ class laserAvoid(Node):
             twist.linear.x = self.linear
             twist.angular.z = 0.0
             sleepTime = 0.2
+        else:
+            sleepTime = 0.2
 
         print(f"{twist.linear.x}, {twist.angular.z}")
-        if self.Drive_active is True:
+        if self.joy_control.driveactive is True:
             self.pub_vel.publish(twist)
         else:
             twist.linear.x = 0.0

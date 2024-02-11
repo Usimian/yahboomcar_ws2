@@ -36,6 +36,7 @@ class laserTracker(Node):
         self.Left_warning = 0
         self.front_warning = 0
         self.Joy_active = False
+        self.Drive_active = False
         self.ros_ctrl = SinglePID()
         self.priorityAngle = 30  # 40
         self.Moving = False
@@ -54,7 +55,8 @@ class laserTracker(Node):
     def JoyStateCallback(self, msg):
         if not isinstance(msg, Bool):
             return
-        self.Joy_active = msg.data
+        self.Drive_active = msg.data
+        print(msg)
 
     def registerScan(self, scan_data):
         if not isinstance(scan_data, LaserScan):
@@ -84,12 +86,7 @@ class laserTracker(Node):
         else:
             minDist = min(minDistList)
             minDistID = minDistIDList[minDistList.index(minDist)]
-        if self.Joy_active or self.Switch is True:
-            if self.Moving is True:
-                self.pub_vel.publish(Twist())
-                self.Moving = not self.Moving
-            return
-        self.Moving = True
+
         velocity = Twist()
         if abs(minDist - self.ResponseDist) < 0.1:
             minDist = self.ResponseDist
@@ -101,7 +98,13 @@ class laserTracker(Node):
             velocity.angular.z = ang_pid_compute
         if ang_pid_compute < 0.02:
             velocity.angular.z = 0.0
-        self.pub_vel.publish(velocity)
+
+        if self.Drive_active is True:
+            self.pub_vel.publish(velocity)
+        else:
+            velocity.linear.x = 0.0
+            velocity.angular.z = 0.0
+            self.pub_vel.publish(velocity)
 
 
 def main():
