@@ -1,20 +1,15 @@
-# ros lib
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
-# from std_msgs.msg import Bool
 from yahboomcar_msgs.msg import JoyControl
+from yahboomcar_laser.common import SinglePID
 
-# commom lib
 import math
 import numpy as np
 
-# import time
 from time import sleep
-from yahboomcar_laser.common import SinglePID
 
-print("import done")
 RAD2DEG = 180 / math.pi
 
 
@@ -128,10 +123,7 @@ class laserAvoid(Node):
         print(f"{twist.linear.x}, {twist.angular.z}")
         if self.joy_control.driveactive is True:
             self.pub_vel.publish(twist)
-        else:
-            twist.linear.x = 0.0
-            twist.angular.z = 0.0
-            self.pub_vel.publish(twist)
+
         sleep(sleepTime)
 
 

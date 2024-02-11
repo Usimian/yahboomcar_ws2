@@ -4,6 +4,7 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool
 from yahboomcar_laser.common import SinglePID
+from yahboomcar_msgs.msg import JoyControl
 
 import math
 import numpy as np
@@ -16,7 +17,7 @@ class laserTracker(Node):
         super().__init__(name)
         # create a sub
         self.sub_laser = self.create_subscription(LaserScan, "/scan", self.registerScan, 1)
-        self.sub_JoyState = self.create_subscription(Bool, "/JoyState", self.JoyStateCallback, 1)
+        self.sub_JoyState = self.create_subscription(JoyControl, "/JoyControl", self.JoyControlCallback, 1)
         # create a pub
         self.pub_vel = self.create_publisher(Twist, "/cmd_vel", 1)
 
@@ -35,13 +36,12 @@ class laserTracker(Node):
         self.Right_warning = 0
         self.Left_warning = 0
         self.front_warning = 0
-        self.Joy_active = False
-        self.Drive_active = False
         self.ros_ctrl = SinglePID()
         self.priorityAngle = 30  # 40
         self.Moving = False
         self.lin_pid = SinglePID(2.0, 0.0, 2.0)
         self.ang_pid = SinglePID(3.0, 0.0, 5.0)
+        self.joy_control = JoyControl()
 
         self.timer = self.create_timer(0.01, self.on_timer)
 
@@ -52,10 +52,10 @@ class laserTracker(Node):
         self.LaserAngle = self.get_parameter("LaserAngle").get_parameter_value().double_value
         self.ResponseDist = self.get_parameter("ResponseDist").get_parameter_value().double_value
 
-    def JoyStateCallback(self, msg):
-        if not isinstance(msg, Bool):
+    def JoyControlCallback(self, msg):
+        if not isinstance(msg, JoyControl):
             return
-        self.Drive_active = msg.data
+        self.joy_control = msg
         print(msg)
 
     def registerScan(self, scan_data):
@@ -99,11 +99,7 @@ class laserTracker(Node):
         if ang_pid_compute < 0.02:
             velocity.angular.z = 0.0
 
-        if self.Drive_active is True:
-            self.pub_vel.publish(velocity)
-        else:
-            velocity.linear.x = 0.0
-            velocity.angular.z = 0.0
+        if self.joy_control.driveactive is True:
             self.pub_vel.publish(velocity)
 
 

@@ -64,22 +64,28 @@ class JoyTeleop(Node):
 
     def user_jetson(self, joy_data):
         # Toggle joystick control on/off
-        if joy_data.buttons[9] == 1:
+        if joy_data.buttons[9] == 1:    # RT
             if self.prev_button_state[9] == 0:  # Button pressed
                 self.Joy_active = not self.Joy_active   # Toggle movement enable
                 if self.Joy_active is True:
+                    self.Joy_control.driveactive = False    # Turn off the drive if joystick is active
+                    self.pub_JoyControl.publish(self.Joy_control)
                     print("Joystick ON")
                 else:
                     print("Joystick OFF")
-                    self.pub_cmdVel.publish(Twist())    # Stop moving
+                self.pub_cmdVel.publish(Twist())    # Stop moving
                 self.prev_button_state[9] = 1
         else:
             self.prev_button_state[9] = 0
 
         # Toggle drive on/off (Y Button)
-        if joy_data.buttons[4] == 1:
+        if joy_data.buttons[4] == 1:    # Y
             if self.prev_button_state[4] == 0:  # Button pressed
-                self.Joy_control.driveactive = not self.Joy_control.driveactive   # Toggle movement enable
+                if self.Joy_active is True:
+                    self.Joy_control.driveactive = False    # Turn off the drive if joystick is active
+                else:
+                    self.Joy_control.driveactive = not self.Joy_control.driveactive   # Toggle movement enable
+
                 if self.Joy_control.driveactive is True:
                     print("Drive ON")
                 else:
@@ -90,6 +96,21 @@ class JoyTeleop(Node):
                 self.prev_button_state[4] = 1
         else:
             self.prev_button_state[4] = 0
+
+        # Toggle on/off (X Button)
+        if joy_data.buttons[3] == 1:    # X
+            if self.prev_button_state[3] == 0:  # Button pressed
+                self.Joy_control.btnx = not self.Joy_control.btnx   # Toggle movement enable
+                if self.Joy_control.btnx is True:
+                    print("Drive ON")
+                else:
+                    print("Drive OFF")
+                    self.pub_cmdVel.publish(Twist())    # Stop moving
+                self.pub_JoyControl.publish(self.Joy_control)
+                # self.pub_goal.publish(GoalID())
+                self.prev_button_state[3] = 1
+        else:
+            self.prev_button_state[3] = 0
 
         # RGBLight
         if joy_data.buttons[7] == 1:  # Light bar sequence button pressed (RB)
