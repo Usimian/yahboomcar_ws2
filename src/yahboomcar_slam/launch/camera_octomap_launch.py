@@ -9,7 +9,7 @@ def generate_launch_description():
 
     bringup_launch = IncludeLaunchDescription(PythonLaunchDescriptionSource(
         [os.path.join(get_package_share_directory('yahboomcar_bringup'), 'launch'),
-        '/yahboomcar_bringup_x1_launch.py'])
+        '/yahboomcar_bringup_X3_launch.py'])
     )
 
     octomap_mapping_node = Node(
