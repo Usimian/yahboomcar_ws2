@@ -18,7 +18,7 @@
                 "/root/yahboomcar_ros2_ws/software/library_ws/install/costmap_converter_msgs/include/**",
                 "/root/yahboomcar_ros2_ws/software/library_ws/install/astra_camera/include/**",
                 "/root/yahboomcar_ros2_ws/software/library_ws/install/astra_camera_msgs/include/**",
-                "/opt/ros/foxy/include/**",
+                "/opt/ros/humble/include/**",
                 "/usr/include/**",
                 "${workspaceFolder}/src/yahboomcar_KCFTracker/include/yahboomcar_KCFTracker"
             ],

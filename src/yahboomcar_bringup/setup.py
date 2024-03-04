@@ -1,6 +1,10 @@
-from setuptools import setup
+"""the setup file."""
+
 import os
 from glob import glob
+
+from setuptools import setup
+
 
 package_name = "yahboomcar_bringup"
 
