@@ -5,8 +5,14 @@ FROM ${BASE_IMAGE}
 RUN apt-get update && apt-get install -y \
     ros-humble-joy \
     ros-humble-robot-localization \
+    ros-humble-rqt* \
+    joystick \
+    usbutils \
+    python3-serial \
     nautilus \
-
 && rm -rf /var/lib/apt/lists/* \
 && apt-get clean
+
+# Add source workspace to .bashrc
+RUN echo "source /workspaces/isaac_ros-dev/yahboomcar_ws2/install/setup.bash" >> ~/.bashrc
 

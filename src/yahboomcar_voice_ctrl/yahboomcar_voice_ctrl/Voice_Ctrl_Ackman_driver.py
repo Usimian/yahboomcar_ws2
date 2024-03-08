@@ -8,7 +8,7 @@ import random
 import threading
 from math import pi
 from time import sleep
-from Rosmaster_Lib import Rosmaster
+from Rosmaster.Rosmaster_Lib import Rosmaster
 from Speech_Lib import Speech
 import time
 

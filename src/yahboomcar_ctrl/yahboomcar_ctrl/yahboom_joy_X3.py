@@ -1,28 +1,31 @@
 #!/usr/bin/env python
+"""Joystick controller node for Yahboom Car."""
 # encoding: utf-8
 
-# public lib
-# import os
-import time
 import getpass
+import time
 
-# import threading
-# from time import sleep
+from actionlib_msgs.msg import GoalID
 
-# ros lib
+from geometry_msgs.msg import Twist
+
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+
 from sensor_msgs.msg import Joy
-from actionlib_msgs.msg import GoalID
-from std_msgs.msg import Int32, Bool
+
+from std_msgs.msg import Bool, Int32
+
 from yahboomcar_msgs.msg import JoyControl
 
 
 class JoyTeleop(Node):
+    """The Joystick class."""
+
     def __init__(self, name):
+        """Initialize."""
         super().__init__(name)
-        self.Joy_active = False     # True enables joystick
+        self.Joy_active = False  # True enables joystick
         self.Buzzer_active = False
         self.RGBLight_index = 0
         self.cancel_time = time.time()
@@ -34,7 +37,7 @@ class JoyTeleop(Node):
         self.Joy_control.btna = False
         self.Joy_control.btnb = False
         self.Joy_control.btnx = False
-        self.Joy_control.driveactive = False   # True enables drive globally
+        self.Joy_control.driveactive = False  # True enables drive globally
 
         # create pub
         self.pub_goal = self.create_publisher(GoalID, "move_base/cancel", 10)
@@ -55,58 +58,59 @@ class JoyTeleop(Node):
         self.angular_speed_limit = self.get_parameter("angular_speed_limit").get_parameter_value().double_value
 
     def buttonCallback(self, joy_data):
+        """buttonCallback."""
         if not isinstance(joy_data, Joy):
             return
-        if self.user_name == "root":
+        if self.user_name == "mw":
             self.user_jetson(joy_data)
         else:
             self.user_pc(joy_data)
 
     def user_jetson(self, joy_data):
-        # Toggle joystick control on/off
-        if joy_data.buttons[9] == 1:    # RT
+        """Toggle joystick control on/off."""
+        if joy_data.buttons[9] == 1:  # RT
             if self.prev_button_state[9] == 0:  # Button pressed
-                self.Joy_active = not self.Joy_active   # Toggle movement enable
+                self.Joy_active = not self.Joy_active  # Toggle movement enable
                 if self.Joy_active is True:
-                    self.Joy_control.driveactive = False    # Turn off the drive if joystick is active
+                    self.Joy_control.driveactive = False  # Turn off the drive if joystick is active
                     self.pub_JoyControl.publish(self.Joy_control)
                     print("Joystick ON")
                 else:
                     print("Joystick OFF")
-                self.pub_cmdVel.publish(Twist())    # Stop moving
+                self.pub_cmdVel.publish(Twist())  # Stop moving
                 self.prev_button_state[9] = 1
         else:
             self.prev_button_state[9] = 0
 
         # Toggle drive on/off (Y Button)
-        if joy_data.buttons[4] == 1:    # Y
+        if joy_data.buttons[4] == 1:  # Y
             if self.prev_button_state[4] == 0:  # Button pressed
                 if self.Joy_active is True:
-                    self.Joy_control.driveactive = False    # Turn off the drive if joystick is active
+                    self.Joy_control.driveactive = False  # Turn off the drive if joystick is active
                 else:
-                    self.Joy_control.driveactive = not self.Joy_control.driveactive   # Toggle movement enable
+                    self.Joy_control.driveactive = not self.Joy_control.driveactive  # Toggle movement enable
 
                 if self.Joy_control.driveactive is True:
                     print("Drive ON")
                 else:
                     print("Drive OFF")
-                    self.pub_cmdVel.publish(Twist())    # Stop moving
+                    self.pub_cmdVel.publish(Twist())  # Stop moving
                 self.pub_JoyControl.publish(self.Joy_control)
                 # self.pub_goal.publish(GoalID())
                 self.prev_button_state[4] = 1
         else:
             self.prev_button_state[4] = 0
 
-        # Toggle on/off (X Button)
-        if joy_data.buttons[3] == 1:    # X
+        # Toggle on/off (X Button) (unused)
+        if joy_data.buttons[3] == 1:  # X
             if self.prev_button_state[3] == 0:  # Button pressed
-                self.Joy_control.btnx = not self.Joy_control.btnx   # Toggle movement enable
+                self.Joy_control.btnx = not self.Joy_control.btnx  # Toggle movement enable
                 if self.Joy_control.btnx is True:
-                    print("Drive ON")
+                    print("Btn X ON")
                 else:
-                    print("Drive OFF")
-                    self.pub_cmdVel.publish(Twist())    # Stop moving
-                self.pub_JoyControl.publish(self.Joy_control)
+                    print("Btn X OFF")
+                #     self.pub_cmdVel.publish(Twist())  # Stop moving
+                # self.pub_JoyControl.publish(self.Joy_control)
                 # self.pub_goal.publish(GoalID())
                 self.prev_button_state[3] = 1
         else:
@@ -197,7 +201,7 @@ class JoyTeleop(Node):
             self.pub_cmdVel.publish(twist)
 
     def user_pc(self, joy_data):
-        # 取消 Cancel
+        """Cancel."""
         if joy_data.axes[5] == -1:
             self.cancel_nav()
         if joy_data.buttons[5] == 1:
@@ -250,23 +254,26 @@ class JoyTeleop(Node):
         self.pub_cmdVel.publish(twist)
 
     def filter_data(self, value):
+        """filter_data."""
         if abs(value) < 0.2:
             value = 0
         return value
 
     def cancel_nav(self):
+        """Toggle driving wheels."""
         Joy_ctrl = Bool()
         Joy_ctrl.data = self.Joy_active
         if self.Joy_active is True:
             print("Joystick drive ON")
         else:
             print("Joystick Drive OFF")
-            self.pub_cmdVel.publish(Twist())    # Stop moving
+            self.pub_cmdVel.publish(Twist())  # Stop moving
         self.pub_JoyState.publish(Joy_ctrl)
         # self.pub_goal.publish(GoalID())
 
 
 def main():
+    """Entry point."""
     rclpy.init()
     joy_ctrl = JoyTeleop("joy_ctrl")
     rclpy.spin(joy_ctrl)

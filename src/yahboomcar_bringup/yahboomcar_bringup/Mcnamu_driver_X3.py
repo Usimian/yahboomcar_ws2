@@ -1,30 +1,30 @@
 #!/usr/bin/env python
+"""Mcnamu Driver X3."""
 # encoding: utf-8
 
-# public lib
-# import sys
-# import math
-# import random
-# import threading
 from math import pi
 
-# from time import sleep
-from Rosmaster_Lib import Rosmaster
+from yahboomcar_bringup.Rosmaster_Lib import Rosmaster
 
-# ros lib
-import rclpy
-from rclpy.node import Node
-from std_msgs.msg import Float32, Int32, Bool
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Imu, MagneticField, JointState
+
+import rclpy
 from rclpy.clock import Clock
+from rclpy.node import Node
+
+from sensor_msgs.msg import Imu, JointState, MagneticField
+
+from std_msgs.msg import Bool, Float32, Int32
 
 # from dynamic_reconfigure.server import Server
 car_type_dic = {"R2": 5, "X3": 1, "NONE": -1}
 
 
 class yahboomcar_driver(Node):
+    """Initialize everything."""
+
     def __init__(self, name):
+        """Initialize."""
         super().__init__(name)
         global car_type_dic
         self.RA2DE = 180 / pi
@@ -73,11 +73,10 @@ class yahboomcar_driver(Node):
 
     # callback function
     def cmd_vel_callback(self, msg):
-        # 小车运动控制，订阅者回调函数
+        """Handle cmd_vel_callback function."""
         # Car motion control, subscriber callback function
         if not isinstance(msg, Twist):
             return
-        # 下发线速度和角速度
         # Issue linear vel and angular vel
         vx = msg.linear.x * 1.0
         # vy = msg.linear.y/1000.0*180.0/3.1416    #Radian system
@@ -91,6 +90,7 @@ class yahboomcar_driver(Node):
         # print(self.nav_use_rotvel)
 
     def RGBLightcallback(self, msg):
+        """Handle RGBLightcallback."""
         # RGBLight control
         if not isinstance(msg, Int32):
             return
@@ -98,6 +98,7 @@ class yahboomcar_driver(Node):
         self.car.set_colorful_effect(msg.data, 6, parm=1)
 
     def Buzzercallback(self, msg):
+        """Handle Buzzercallback."""
         if not isinstance(msg, Bool):
             return
         if msg.data:
@@ -109,6 +110,7 @@ class yahboomcar_driver(Node):
 
     # pub data
     def pub_data(self):
+        """Publish on timer."""
         time_stamp = Clock().now()
         imu = Imu()
         twist = Twist()
@@ -150,7 +152,6 @@ class yahboomcar_driver(Node):
         # print("vx: ",vx)
         # print("vy: ",vy)
         # print("angular: ",angular)
-        # 发布陀螺仪的数据
         # Publish gyroscope data
         imu.header.stamp = time_stamp.to_msg()
         imu.header.frame_id = self.imu_link
@@ -167,7 +168,6 @@ class yahboomcar_driver(Node):
         mag.magnetic_field.y = my * 1.0
         mag.magnetic_field.z = mz * 1.0
 
-        # 将小车当前的线速度和角速度发布出去
         # Publish the current linear vel and angular vel of the car
         twist.linear.x = vx * 1.0
         twist.linear.y = vy * 1.0
@@ -185,6 +185,7 @@ class yahboomcar_driver(Node):
 
 
 def main():
+    """Entry."""
     rclpy.init()
     driver = yahboomcar_driver("driver_node")
     rclpy.spin(driver)
