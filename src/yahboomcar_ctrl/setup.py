@@ -1,6 +1,9 @@
-from setuptools import setup
+"""yahboomcar_ctrl setup file."""
+
 import os
 from glob import glob
+
+from setuptools import setup
 
 package_name = "yahboomcar_ctrl"
 

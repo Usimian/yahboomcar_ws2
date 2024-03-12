@@ -30,8 +30,8 @@ class JoyTeleop(Node):
         self.RGBLight_index = 0
         self.cancel_time = time.time()
         self.user_name = getpass.getuser()
-        self.linear_Gear = 1
-        self.angular_Gear = 1
+        self.linear_Gear = 0.25
+        self.angular_Gear = 0.25
         self.prev_button_state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.Joy_control = JoyControl()
         self.Joy_control.btna = False

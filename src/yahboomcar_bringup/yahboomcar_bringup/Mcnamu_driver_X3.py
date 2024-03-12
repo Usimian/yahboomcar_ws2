@@ -4,8 +4,6 @@
 
 from math import pi
 
-from yahboomcar_bringup.Rosmaster_Lib import Rosmaster
-
 from geometry_msgs.msg import Twist
 
 import rclpy
@@ -15,6 +13,8 @@ from rclpy.node import Node
 from sensor_msgs.msg import Imu, JointState, MagneticField
 
 from std_msgs.msg import Bool, Float32, Int32
+
+from yahboomcar_bringup.Rosmaster_Lib import Rosmaster
 
 # from dynamic_reconfigure.server import Server
 car_type_dic = {"R2": 5, "X3": 1, "NONE": -1}
