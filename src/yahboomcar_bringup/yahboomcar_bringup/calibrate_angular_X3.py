@@ -1,4 +1,4 @@
-"""calibrate angular drive."""
+"""Calibrate angular drive."""
 
 from math import copysign, radians
 from math import pi
@@ -15,13 +15,13 @@ from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
 
 
-class Calibrateangular(Node):
+class CalibrateAngular(Node):
     """Calibrate angular."""
 
     def __init__(self, name):
         """Init."""
         super().__init__(name)
-        # create a spublisher
+        # create a publisher
         self.cmd_vel = self.create_publisher(Twist, "/cmd_vel", 5)
         # declare_parameter
         self.declare_parameter("rate", 20.0)
@@ -79,7 +79,7 @@ class Calibrateangular(Node):
         self.error = 0
 
     def on_timer(self):
-        """on_time."""
+        """on_timer."""
         self.start_test = self.get_parameter("start_test").get_parameter_value().bool_value
         self.odom_angular_scale_correction = (
             self.get_parameter("odom_angular_scale_correction").get_parameter_value().double_value
@@ -159,7 +159,7 @@ class Calibrateangular(Node):
 def main():
     """Entry point."""
     rclpy.init()
-    class_calibrateangular = Calibrateangular("calibrate_angular")
+    class_calibrateangular = CalibrateAngular("calibrate_angular")
     try:
         rclpy.spin(class_calibrateangular)
     except KeyboardInterrupt:

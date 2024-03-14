@@ -6,26 +6,15 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
 
-#include <memory>
-#include <string>
-
 #include <geometry_msgs/msg/transform_stamped.hpp>
 
-#include <rclcpp/rclcpp.hpp>
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2_ros/transform_broadcaster.h>
-#include <turtlesim/msg/pose.hpp>
-
-#include <memory>
-#include <string>
+// #include <turtlesim/msg/pose.hpp>
 
 #include <chrono>
 #include <functional>
 #include <memory>
 #include <string>
 
-#include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
 using std::placeholders::_1;
 
 class OdomPublisher:public rclcpp ::Node

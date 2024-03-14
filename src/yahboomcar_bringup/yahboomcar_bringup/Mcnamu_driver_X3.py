@@ -145,13 +145,14 @@ class yahboomcar_driver(Node):
         ax, ay, az = self.car.get_accelerometer_data()
         gx, gy, gz = self.car.get_gyroscope_data()
         mx, my, mz = self.car.get_magnetometer_data()
+        # print(ax, ay, az, gx, gy, gz, mx, my, mz)
         mx = mx * 1.0
         my = my * 1.0
         mz = mz * 1.0
         vx, vy, angular = self.car.get_motion_data()
-        # print("vx: ",vx)
-        # print("vy: ",vy)
-        # print("angular: ",angular)
+        # print("vx: ", vx)
+        # print("vy: ", vy)
+        # print("angular: ", angular)
         # Publish gyroscope data
         imu.header.stamp = time_stamp.to_msg()
         imu.header.frame_id = self.imu_link
@@ -173,9 +174,9 @@ class yahboomcar_driver(Node):
         twist.linear.y = vy * 1.0
         twist.angular.z = angular * 1.0
         self.velPublisher.publish(twist)
-        # print("ax: %.5f, ay: %.5f, az: %.5f" % (ax, ay, az))
-        # print("gx: %.5f, gy: %.5f, gz: %.5f" % (gx, gy, gz))
-        # print("mx: %.5f, my: %.5f, mz: %.5f" % (mx, my, mz))
+        print("ax: %.5f, ay: %.5f, az: %.5f" % (ax, ay, az))
+        print("gx: %.5f, gy: %.5f, gz: %.5f" % (gx, gy, gz))
+        print("mx: %.5f, my: %.5f, mz: %.5f" % (mx, my, mz))
         # rospy.loginfo("battery: {}".format(battery))
         # rospy.loginfo("vx: {}, vy: {}, angular: {}".format(twist.linear.x, twist.linear.y, twist.angular.z))
         self.imuPublisher.publish(imu)

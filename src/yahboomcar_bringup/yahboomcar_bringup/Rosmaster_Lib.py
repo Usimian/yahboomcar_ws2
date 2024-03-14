@@ -1215,25 +1215,23 @@ class Rosmaster(object):
             print("---get_uart_servo_angle_array error!---")
             return [-2, -2, -2, -2, -2, -2]
 
-    # 获取加速度计三轴数据，返回a_x, a_y, a_z
     # Get accelerometer triaxial data, return a_x, a_y, a_z
     def get_accelerometer_data(self):
-        """get_accelerometer_data."""
+        """Get_accelerometer_data, return a_x, a_y, a_z."""
         a_x, a_y, a_z = self.__ax, self.__ay, self.__az
         # self.__ax, self.__ay, self.__az = 0.0, 0.0, 0.0
         return a_x, a_y, a_z
 
-    # 获取陀螺仪三轴数据，返回g_x, g_y, g_z
     # Get the gyro triaxial data, return g_x, g_y, g_z
     def get_gyroscope_data(self):
-        """get_gyroscope_data."""
+        """Get_gyroscope_data, return return g_x, g_y, g_z."""
         g_x, g_y, g_z = self.__gx, self.__gy, self.__gz
         # self.__gx, self.__gy, self.__gz = 0.0, 0.0, 0.0
         return g_x, g_y, g_z
 
-    # 获取磁力计三轴数据，返回m_x, m_y, m_z
+    # Get magnetometer data, return m_x, m_y, m_z
     def get_magnetometer_data(self):
-        """get_magnetometer_data."""
+        """Get_magnetometer_data, return return m_x, m_y, m_z."""
         m_x, m_y, m_z = self.__mx, self.__my, self.__mz
         # self.__mx, self.__my, self.__mz = 0.0, 0.0, 0.0
         return m_x, m_y, m_z

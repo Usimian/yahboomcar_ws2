@@ -1,4 +1,5 @@
 """X3 car bringup."""
+
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -6,15 +7,11 @@ from ament_index_python.packages import get_package_share_path
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.actions import IncludeLaunchDescription
 from launch.conditions import IfCondition, UnlessCondition
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
-
 
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
-
 
 print("---------------------robot_type = x3---------------------")
 
@@ -24,6 +21,7 @@ def generate_launch_description():
     urdf_tutorial_path = get_package_share_path("yahboomcar_description")
     default_model_path = urdf_tutorial_path / "urdf/yahboomcar_X3.urdf"
     default_rviz_config_path = urdf_tutorial_path / "rviz/yahboomcar.rviz"
+    share_dir = get_package_share_directory("yahboomcar_bringup")
 
     gui_arg = DeclareLaunchArgument(
         name="gui",
@@ -72,9 +70,8 @@ def generate_launch_description():
         arguments=["-d", LaunchConfiguration("rvizconfig")],
     )
 
-    imu_filter_config = os.path.join(
-        get_package_share_directory("yahboomcar_bringup"), "param", "imu_filter_param.yaml"
-    )
+    imu_filter_config = os.path.join(share_dir, "param", "imu_filter_param.yaml")
+    ekf_filter_config = os.path.join(share_dir, "param", "ekf_x1_x3.yaml")
 
     driver_node = Node(
         package="yahboomcar_bringup",
@@ -84,7 +81,6 @@ def generate_launch_description():
     base_node = Node(
         package="yahboomcar_base_node",
         executable="base_node_X3",
-        # 当使用ekf融合时，该tf有ekf发布
         parameters=[{"pub_odom_tf": LaunchConfiguration("pub_odom_tf")}],
     )
 
@@ -92,10 +88,11 @@ def generate_launch_description():
         package="imu_filter_madgwick", executable="imu_filter_madgwick_node", parameters=[imu_filter_config]
     )
 
-    ekf_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [os.path.join(get_package_share_directory("robot_localization"), "launch"), "/ekf_x1_x3_launch.py"]
-        )
+    ekf_node = Node(
+        package="robot_localization",
+        executable="ekf_node",
+        parameters=[ekf_filter_config],
+        remappings=[("/odometry/filtered", "/odom")],
     )
 
     yahboom_joy_node = Node(

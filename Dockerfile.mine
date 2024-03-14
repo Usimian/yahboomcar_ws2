@@ -1,11 +1,17 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-# Install additional ROS/utility packages
+# Install additional ROS packages
 RUN apt-get update && apt-get install -y \
     ros-humble-joy \
     ros-humble-robot-localization \
     ros-humble-rqt* \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Install additional utility packages
+RUN apt-get update && apt-get install -y \
+    python3-pykdl \
     joystick \
     usbutils \
     python3-serial \
