@@ -1,6 +1,8 @@
-from setuptools import setup
+"""Package setup file."""
 import os
 from glob import glob
+
+from setuptools import setup
 
 package_name = "yahboomcar_laser"
 

@@ -61,10 +61,7 @@ class JoyTeleop(Node):
         """buttonCallback."""
         if not isinstance(joy_data, Joy):
             return
-        if self.user_name == "mw":
-            self.user_jetson(joy_data)
-        else:
-            self.user_pc(joy_data)
+        self.user_jetson(joy_data)
 
     def user_jetson(self, joy_data):
         """Toggle joystick control on/off."""
@@ -200,76 +197,11 @@ class JoyTeleop(Node):
         if self.Joy_active is True:
             self.pub_cmdVel.publish(twist)
 
-    def user_pc(self, joy_data):
-        """Cancel."""
-        if joy_data.axes[5] == -1:
-            self.cancel_nav()
-        if joy_data.buttons[5] == 1:
-            if self.RGBLight_index < 6:
-                self.pub_RGBLight.publish(self.RGBLight_index)
-                # print ("pub RGBLight success")
-            else:
-                self.RGBLight_index = 0
-            self.RGBLight_index += 1
-        if joy_data.buttons[7] == 1:
-            self.Buzzer_active = not self.Buzzer_active
-            # print "self.Buzzer_active: ", self.Buzzer_active
-            self.pub_Buzzer.publish(self.Buzzer_active)
-        # Gear control
-        if joy_data.buttons[9] == 1:
-            if self.linear_Gear == 1.0:
-                self.linear_Gear = 1.0 / 3
-            elif self.linear_Gear == 1.0 / 3:
-                self.linear_Gear = 2.0 / 3
-            elif self.linear_Gear == 2.0 / 3:
-                self.linear_Gear = 1
-        if joy_data.buttons[10] == 1:
-            if self.angular_Gear == 1.0:
-                self.angular_Gear = 1.0 / 4
-            elif self.angular_Gear == 1.0 / 4:
-                self.angular_Gear = 1.0 / 2
-            elif self.angular_Gear == 1.0 / 2:
-                self.angular_Gear = 3.0 / 4
-            elif self.angular_Gear == 3.0 / 4:
-                self.angular_Gear = 1.0
-        xlinear_speed = self.filter_data(joy_data.axes[1]) * self.xspeed_limit * self.linear_Gear
-        ylinear_speed = self.filter_data(joy_data.axes[0]) * self.yspeed_limit * self.linear_Gear
-        angular_speed = self.filter_data(joy_data.axes[2]) * self.angular_speed_limit * self.angular_Gear
-        if xlinear_speed > self.xspeed_limit:
-            xlinear_speed = self.xspeed_limit
-        elif xlinear_speed < -self.xspeed_limit:
-            xlinear_speed = -self.xspeed_limit
-        if ylinear_speed > self.yspeed_limit:
-            ylinear_speed = self.yspeed_limit
-        elif ylinear_speed < -self.yspeed_limit:
-            ylinear_speed = -self.yspeed_limit
-        if angular_speed > self.angular_speed_limit:
-            angular_speed = self.angular_speed_limit
-        elif angular_speed < -self.angular_speed_limit:
-            angular_speed = -self.angular_speed_limit
-        twist = Twist()
-        twist.linear.x = xlinear_speed
-        twist.linear.y = ylinear_speed
-        twist.angular.z = angular_speed
-        self.pub_cmdVel.publish(twist)
-
     def filter_data(self, value):
         """filter_data."""
         if abs(value) < 0.2:
             value = 0
         return value
-
-    def cancel_nav(self):
-        """Toggle driving wheels."""
-        Joy_ctrl = Bool()
-        Joy_ctrl.data = self.Joy_active
-        if self.Joy_active is True:
-            print("Joystick drive ON")
-        else:
-            print("Joystick Drive OFF")
-            self.pub_cmdVel.publish(Twist())  # Stop moving
-        self.pub_JoyState.publish(Joy_ctrl)
-        # self.pub_goal.publish(GoalID())
 
 
 def main():

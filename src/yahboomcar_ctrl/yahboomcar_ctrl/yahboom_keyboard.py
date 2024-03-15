@@ -1,13 +1,12 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# import public lib
-from geometry_msgs.msg import Twist
-import sys
+"""Yahboom Keyboard."""
+
 import select
+import sys
 import termios
 import tty
 
-# import ros lib
+from geometry_msgs.msg import Twist
+
 import rclpy
 from rclpy.node import Node
 
@@ -63,8 +62,11 @@ speedBindings = {
 }
 
 
-class Yahboom_Keybord(Node):
+class Yahboom_Keyboard(Node):
+    """Keyboard Node Class."""
+
     def __init__(self, name):
+        """Init."""
         super().__init__(name)
         self.pub = self.create_publisher(Twist, "cmd_vel", 1)
         self.declare_parameter("linear_speed_limit", 1.0)
@@ -74,6 +76,7 @@ class Yahboom_Keybord(Node):
         self.settings = termios.tcgetattr(sys.stdin)
 
     def getKey(self):
+        """getkey."""
         tty.setraw(sys.stdin.fileno())
         rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
         if rlist:
@@ -84,12 +87,14 @@ class Yahboom_Keybord(Node):
         return key
 
     def vels(self, speed, turn):
+        """vels."""
         return "currently:\tspeed %s\tturn %s " % (speed, turn)
 
 
 def main():
+    """Entry point."""
     rclpy.init()
-    yahboom_keyboard = Yahboom_Keybord("yahboom_keyboard_ctrl")
+    yahboom_keyboard = Yahboom_Keyboard("yahboom_keyboard_ctrl")
     xspeed_switch = True
     (speed, turn) = (0.2, 1.0)
     (x, th) = (0, 0)
@@ -142,8 +147,8 @@ def main():
                 yahboom_keyboard.pub.publish(twist)
             if stop:
                 yahboom_keyboard.pub.publish(Twist())
-    except Exception as e:
-        print(e)
+    except KeyboardInterrupt:
+        pass
     finally:
         yahboom_keyboard.pub.publish(Twist())
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, yahboom_keyboard.settings)

@@ -4,7 +4,11 @@ FROM ${BASE_IMAGE}
 # Install additional ROS packages
 RUN apt-get update && apt-get install -y \
     ros-humble-joy \
+    ros-humble-joint-state-publisher \
     ros-humble-robot-localization \
+    ros-humble-xacro \
+    ros-humble-imu-tools \
+    ros-humble-turtlesim \
     ros-humble-rqt* \
 && rm -rf /var/lib/apt/lists/* \
 && apt-get clean
@@ -12,6 +16,7 @@ RUN apt-get update && apt-get install -y \
 # Install additional utility packages
 RUN apt-get update && apt-get install -y \
     python3-pykdl \
+    libgeographic-dev \
     joystick \
     usbutils \
     python3-serial \
@@ -20,5 +25,7 @@ RUN apt-get update && apt-get install -y \
 && apt-get clean
 
 # Add source workspace to .bashrc
-RUN echo "source /workspaces/isaac_ros-dev/yahboomcar_ws2/install/setup.bash" >> ~/.bashrc
-
+#RUN echo "source /workspaces/isaac_ros-dev/yahboomcar_ws2/install/setup.bash" >> ~/.bashrc
+#RUN echo "source /workspaces/isaac_ros-dev/software/library_ws/install/setup.bash" >> ~/.bashrc
+# Add source workspaces and other items to .bashrc
+RUN echo "source /workspaces/isaac_ros-dev/ros_ws/docker/bash_additions" >> ~/.bashrc

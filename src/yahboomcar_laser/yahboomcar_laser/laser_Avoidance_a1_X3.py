@@ -1,20 +1,29 @@
-import rclpy
-from rclpy.node import Node
-from geometry_msgs.msg import Twist
-from sensor_msgs.msg import LaserScan
-from yahboomcar_msgs.msg import JoyControl
-from yahboomcar_laser.common import SinglePID
+"""Laser Avoidance."""
 
 import math
+from time import sleep
+
+from geometry_msgs.msg import Twist
+
 import numpy as np
 
-from time import sleep
+import rclpy
+from rclpy.node import Node
+
+from sensor_msgs.msg import LaserScan
+
+from yahboomcar_laser.common import SinglePID
+
+from yahboomcar_msgs.msg import JoyControl
 
 RAD2DEG = 180 / math.pi
 
 
 class laserAvoid(Node):
+    """Laser Avoidance Node Class."""
+
     def __init__(self, name):
+        """Init."""
         super().__init__(name)
         # create a sub
         self.sub_laser = self.create_subscription(LaserScan, "/scan", self.registerScan, 1)
@@ -44,6 +53,7 @@ class laserAvoid(Node):
         self.timer = self.create_timer(0.01, self.on_timer)
 
     def on_timer(self):
+        """Handle on_timer."""
         self.Switch = self.get_parameter("Switch").get_parameter_value().bool_value
         self.angular = self.get_parameter("angular").get_parameter_value().double_value
         self.linear = self.get_parameter("linear").get_parameter_value().double_value
@@ -51,12 +61,14 @@ class laserAvoid(Node):
         self.ResponseDist = self.get_parameter("ResponseDist").get_parameter_value().double_value
 
     def JoyControlCallback(self, msg):
+        """Handle JoyControlCallback."""
         if not isinstance(msg, JoyControl):
             return
         self.joy_control = msg
         print(msg)
 
     def registerScan(self, scan_data):
+        """Handle registerScan."""
         if not isinstance(scan_data, LaserScan):
             return
         ranges = np.array(scan_data.ranges)
@@ -128,6 +140,7 @@ class laserAvoid(Node):
 
 
 def main():
+    """Entrypoint."""
     rclpy.init()
     laser_avoid = laserAvoid("laser_Avoidance_a1")
     print("start it")

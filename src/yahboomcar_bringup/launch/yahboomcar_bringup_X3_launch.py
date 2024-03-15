@@ -40,7 +40,6 @@ def generate_launch_description():
         default_value="false",
         description="Whether to publish the tf from the original odom to the base_footprint",
     )
-
     robot_description = ParameterValue(Command(["xacro ", LaunchConfiguration("model")]), value_type=str)
 
     robot_state_publisher_node = Node(
@@ -48,28 +47,24 @@ def generate_launch_description():
         executable="robot_state_publisher",
         parameters=[{"robot_description": robot_description}],
     )
-
     # Depending on gui parameter, either launch joint_state_publisher or joint_state_publisher_gui
     joint_state_publisher_node = Node(
         package="joint_state_publisher",
         executable="joint_state_publisher",
         condition=UnlessCondition(LaunchConfiguration("gui")),
     )
-
     joint_state_publisher_gui_node = Node(
         package="joint_state_publisher_gui",
         executable="joint_state_publisher_gui",
         condition=IfCondition(LaunchConfiguration("gui")),
     )
-
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="screen",
-        arguments=["-d", LaunchConfiguration("rvizconfig")],
-    )
-
+    # rviz_node = Node(
+    #     package="rviz2",
+    #     executable="rviz2",
+    #     name="rviz2",
+    #     output="screen",
+    #     arguments=["-d", LaunchConfiguration("rvizconfig")],
+    # )
     imu_filter_config = os.path.join(share_dir, "param", "imu_filter_param.yaml")
     ekf_filter_config = os.path.join(share_dir, "param", "ekf_x1_x3.yaml")
 
@@ -77,29 +72,24 @@ def generate_launch_description():
         package="yahboomcar_bringup",
         executable="Mcnamu_driver_X3",
     )
-
     base_node = Node(
         package="yahboomcar_base_node",
         executable="base_node_X3",
         parameters=[{"pub_odom_tf": LaunchConfiguration("pub_odom_tf")}],
     )
-
     imu_filter_node = Node(
         package="imu_filter_madgwick", executable="imu_filter_madgwick_node", parameters=[imu_filter_config]
     )
-
     ekf_node = Node(
         package="robot_localization",
         executable="ekf_node",
         parameters=[ekf_filter_config],
         remappings=[("/odometry/filtered", "/odom")],
     )
-
     yahboom_joy_node = Node(
         package="yahboomcar_ctrl",
         executable="yahboom_joy_X3",
     )
-
     return LaunchDescription(
         [
             gui_arg,
@@ -109,7 +99,7 @@ def generate_launch_description():
             joint_state_publisher_node,
             joint_state_publisher_gui_node,
             robot_state_publisher_node,
-            rviz_node,
+            # rviz_node,
             driver_node,
             base_node,
             imu_filter_node,
