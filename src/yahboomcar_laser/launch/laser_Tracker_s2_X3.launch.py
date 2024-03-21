@@ -1,4 +1,4 @@
-"""Laser Avoidance Launch File."""
+"""Laser Tracker Launch File."""
 
 import os
 
@@ -13,7 +13,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     """Generate the launch description."""
-    laser_Avoidance_node = Node(
+    laser_Tracker_node = Node(
         package="yahboomcar_laser",
         executable="laser_Tracker_a1_X3",
     )
@@ -30,5 +30,5 @@ def generate_launch_description():
             ]
         )
     )
-    launch_description = LaunchDescription([laser_Avoidance_node, lidar_node, bringup_node])
+    launch_description = LaunchDescription([laser_Tracker_node, lidar_node, bringup_node])
     return launch_description

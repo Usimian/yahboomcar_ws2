@@ -17,7 +17,6 @@ def generate_launch_description():
         package="yahboomcar_laser",
         executable="laser_Avoidance_a1_X3",
     )
-
     lidar_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [os.path.join(get_package_share_directory("sllidar_ros2"), "launch"), "/sllidar_s2_launch.py"]

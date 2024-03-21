@@ -1,0 +1,11 @@
+-v /dev/bus/usb/001/006:/dev/bus/usb/001/006
+-v /dev/bus/usb/001/008:/dev/bus/usb/001/008
+--device=/dev/astro_pro_plus
+--device=/dev/astro_pro_plus_rgb
+--device=/dev/video0
+--device=/dev/myserial
+--device=/dev/rplidar
+--device=/dev/input
+--device=/dev/input/event0
+-p 9090:9090
+-p 8888:8888

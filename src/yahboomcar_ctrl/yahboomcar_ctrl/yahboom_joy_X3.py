@@ -56,6 +56,7 @@ class JoyTeleop(Node):
         self.xspeed_limit = self.get_parameter("xspeed_limit").get_parameter_value().double_value
         self.yspeed_limit = self.get_parameter("yspeed_limit").get_parameter_value().double_value
         self.angular_speed_limit = self.get_parameter("angular_speed_limit").get_parameter_value().double_value
+        print("Yahboomcar_ctrl Joystick X3 Node")
 
     def buttonCallback(self, joy_data):
         """buttonCallback."""
